@@ -1,0 +1,44 @@
+# This file can be used to install module dependencies for unit testing
+# See https://github.com/puppetlabs/puppetlabs_spec_helper#using-fixtures for details
+---
+fixtures:
+  forge_modules:
+    stdlib:
+      repo: "puppetlabs/stdlib"
+      ref: "6.4.0"
+    inifile:
+      repo: "puppetlabs/inifile"
+      ref: "4.2.0"
+    # These are not included in Puppet 6 base, must be included manually
+    augeas_core:
+      repo: "puppetlabs/augeas_core"
+      ref: "1.0.3"
+      puppet_version: ">= 6.0.0"
+    cron_core:
+      repo: "puppetlabs/cron_core"
+      ref: "1.0.0"
+      puppet_version: ">= 6.0.0"
+    host_core:
+      repo: "puppetlabs/host_core"
+      ref: "1.0.1"
+      puppet_version: ">= 6.0.0"
+    mount_core:
+      repo: "puppetlabs/mount_core"
+      ref: "1.0.2"
+      puppet_version: ">= 6.0.0"
+    scheduled_task:
+      repo: "puppetlabs/scheduled_task"
+      ref: "1.0.0"
+      puppet_version: ">= 6.0.0"
+    selinux_core:
+      repo: "puppetlabs/selinux_core"
+      ref: "1.0.1"
+      puppet_version: ">= 6.0.0"
+    sshkeys_core:
+      repo: "puppetlabs/sshkeys_core"
+      ref: "1.0.1"
+      puppet_version: ">= 6.0.0"
+    yumrepo_core:
+      repo: "puppetlabs/yumrepo_core"
+      ref: "1.0.1"
+      puppet_version: ">= 6.0.0"

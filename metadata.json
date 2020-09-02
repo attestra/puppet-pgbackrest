@@ -1,0 +1,56 @@
+{
+  "name": "atqquebec-pgbackrest",
+  "version": "0.1.0",
+  "author": "Jo Rhett",
+  "summary": "Manage PostgresQL Backup/Restore pgbackrest",
+  "license": "Apache-2.0",
+  "source": "https://github.com/atqquebec/puppet-pgbackrest",
+  "dependencies": [
+    {
+      "name": "puppetlabs/inifile",
+      "version_requirement": ">= 4.0.0 < 5.0.0"
+    },
+    {
+      "name": "puppetlabs/stdlib",
+      "version_requirement": ">= 4.25.1 < 7.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "OracleLinux",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "RedHat",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    },
+    {
+      "operatingsystem": "Scientific",
+      "operatingsystemrelease": [
+        "7"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": ">= 5.5.8 < 7.0.0"
+    }
+  ],
+  "pdk-version": "1.18.1",
+  "template-url": "pdk-default#1.18.1",
+  "template-ref": "tags/1.18.1-0-g3d2e75c"
+}

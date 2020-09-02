@@ -1,0 +1,18 @@
+---
+pgbackrest::yumrepos::release_rpm: 'pgdg-redhat-repo'
+pgbackrest::yumrepos::release_rpm_source: 'https://download.postgresql.org/pub/repos/yum/reporpms/EL-%{facts.os.release.major}-%{facts.os.architecture}/pgdg-redhat-repo-latest.noarch.rpm'
+pgbackrest::yumrepos::release_rpm_ensure: 'latest'
+pgbackrest::yumrepos::pgsql_versions:
+  - 13
+  - 12
+  - 11
+  - 10
+  - 96
+  - 95
+  - 94
+
+# If you wish to use the postgresql.org package repos, set these values in your environment data
+#pgbackrest::yumrepos::enable_version: 12
+#pgbackrest::config:
+#  main:
+#    pg1-path: /var/lib/pgsql/%{pgbackrest::yumrepos::enable_version}/data
