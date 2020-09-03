@@ -1,0 +1,20 @@
+---
+spec/spec_helper.rb:
+  mock_with: ':rspec'
+  coverage_report: true
+Rakefile:
+  changelog_since_tag: 1.0.0
+
+# Travis configuration
+.travis.yml:
+  user: atqquebec
+  secure: "" # put the secure value here
+  docker_sets:
+    - set: centos8-64
+    - set: centos7-64
+
+# Things to remove
+appveyor.yml:
+  delete: true
+.gitlab-ci.yml:
+  delete: true

@@ -28,6 +28,24 @@ jobs:
   fast_finish: true
   include:
     -
+      bundler_args: --with system_tests
+      dist: trusty
+      env: PUPPET_INSTALL_TYPE=agent BEAKER_debug=true BEAKER_PUPPET_COLLECTION=puppet6 BEAKER_set=centos8-64 BEAKER_TESTMODE=apply
+      rvm: 2.5.7
+      script: bundle exec rake beaker
+      services: docker
+      stage: acceptance
+      sudo: required
+    -
+      bundler_args: --with system_tests
+      dist: trusty
+      env: PUPPET_INSTALL_TYPE=agent BEAKER_debug=true BEAKER_PUPPET_COLLECTION=puppet6 BEAKER_set=centos7-64 BEAKER_TESTMODE=apply
+      rvm: 2.5.7
+      script: bundle exec rake beaker
+      services: docker
+      stage: acceptance
+      sudo: required
+    -
       env: CHECK="check:symlinks check:git_ignore check:dot_underscore check:test_file rubocop syntax lint metadata_lint"
       stage: static
     -
@@ -47,3 +65,12 @@ branches:
     - /^v\d/
 notifications:
   email: false
+deploy:
+  provider: puppetforge
+  username: atqquebec
+  password:
+    secure: ""
+  on:
+    tags: true
+    all_branches: true
+    condition: "$DEPLOY_TO_FORGE = yes"
