@@ -16,17 +16,48 @@ This module allows all pgBackRest configuration options to be set in Hiera data.
 
 ## Setup
 
-### Setup Requirements
+### PostgresQL Repositories
 
-*tbd*
+If you are not managing the repos another way, this module can install the postgresql.org
+release RPM and enable the repo for the version you choose.
+
+Do not enable repo management when using
+  [puppetlabs/postgresql](https://forge.puppet.com/puppetlabs/postgresql)'s `$manage_package_repo` option.
+The two repo management classes are redundant and will conflict with each other.
+
+```yaml
+pgbackrest::manage_package_repo: true      # Boolean
+pgbackrest::yumrepos::enable_version: 12   # Integer
+```
+
+If you leave the `enable_version` parameter undeclared, only the *common* repo will be enabled.
+This is the correct choice if you are using a different upstream, such as the PostgresQL AppStream,
+and only want the addon packages (like pgBackRest). This is the default behavior.
+
+If you wish to prevent updates or to remove the release RPM, you can change:
+
+```yaml
+pgbackrest::yumrepos::release_rpm_ensure: 'absent'
+```
+
+This will naturally prevent installation or updates of pgBackRest.
 
 ## Usage
 
-*tbd*
+Simply adding the module to a profile is sufficient to install pgBackRest.
+
+```ruby
+include pgbackrest
+```
+
+Only include the main class. Do not directly include the subclasses,
+as they are contained by the top-level class. Subclasses may be refactored without notice.
 
 ## Limitations
 
-*tbd*
+Do not enable `manage_package_repo` when using
+  [puppetlabs/postgresql](https://forge.puppet.com/puppetlabs/postgresql)'s `$manage_package_repo` option.
+The two repo management classes are redundant.
 
 ## Development
 

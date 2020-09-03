@@ -8,14 +8,13 @@ defaults:  # Used for any hierarchy level that omits these keys.
 hierarchy:
   - name: "osfamily/major release"
     paths:
-        # Used to distinguish between Debian and Ubuntu
-      - "os/%{facts.os.name}/%{facts.os.release.major}.yaml"
-      - "os/%{facts.os.family}/%{facts.os.release.major}.yaml"
-        # Used for Solaris
-      - "os/%{facts.os.family}/%{facts.kernelrelease}.yaml"
+      - "os/%{facts.os.family}/%{facts.os.name}_%{facts.os.release.major}.yaml"
+      - "os/%{facts.os.family}/common_%{facts.os.release.major}.yaml"
+
   - name: "osfamily"
     paths:
-      - "os/%{facts.os.name}.yaml"
-      - "os/%{facts.os.family}.yaml"
+      - "os/%{facts.os.family}/%{facts.os.name}_common.yaml"
+      - "os/%{facts.os.family}/common.yaml"
+
   - name: 'common'
     path: 'common.yaml'

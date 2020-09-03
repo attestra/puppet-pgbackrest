@@ -1,1 +1,10 @@
---- {}
+---
+# Don't enable this if using puppetlabs/postgresql with $manage_package_repo enabled
+pgbackrest::manage_package_repo: false
+# You can assign a specific version
+pgbackrest::version: 'latest'
+
+# Configuration options
+pgbackrest::config:
+  global: {}
+  main: {}
