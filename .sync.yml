@@ -4,6 +4,10 @@ spec/spec_helper.rb:
   coverage_report: true
 Rakefile:
   changelog_since_tag: 1.0.0
+Gemfile:
+  optional:
+    ":development":
+      - gem: github_changelog_generator
 
 # Travis configuration
 .travis.yml:
@@ -12,6 +16,8 @@ Rakefile:
   docker_sets:
     - set: centos8-64
     - set: centos7-64
+  branches:
+    - master
 
 # Things to remove
 appveyor.yml:
