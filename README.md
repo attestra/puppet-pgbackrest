@@ -53,6 +53,21 @@ include pgbackrest
 Only include the main class. Do not directly include the subclasses,
 as they are contained by the top-level class. Subclasses may be refactored without notice.
 
+## Central repository setup
+
+To configure backups to be shipped from multiple PostgreSQL servers to
+a central server (called here a "repository"), use the
+`pgbackrest::repository` class on the server and the
+`pgbackrest::client` on the servers.
+
+    class { 'pgbackrest::client':
+      repository_fqdn => 'repository.example.com',
+    }
+
+Then on the `repository` server:
+
+    include pgbackrest::repository
+
 ## Limitations
 
 Do not enable `manage_package_repo` when using
