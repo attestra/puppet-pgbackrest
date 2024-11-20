@@ -2,7 +2,7 @@
 # Don't enable this if using puppetlabs/postgresql with $manage_package_repo enabled
 pgbackrest::manage_package_repo: false
 # You can assign a specific version
-pgbackrest::version: 'latest'
+pgbackrest::version: 'present'
 
 # Configuration options
 pgbackrest::config:
