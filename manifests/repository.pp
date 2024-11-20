@@ -22,8 +22,9 @@ class pgbackrest::repository (
       # export an SSH key for each user, pgbackrest::clients realize this resource
       $pg_backrest_users.each | $repository_pg_user, $ssh_keys | {
         # remove the 'line' key so we can pass the rest directly to the ssh_authorized_key resource
-        $_ssh_key_params = $ssh_keys['id_rsa.pub'].filter | $key, $value | { $key != 'line' }
-        @@ssh_authorized_key { "postgres-key-for-${repository_pg_user}-from-${facts['networking']['fqdn']}":
+        $ssh_key_params = $ssh_keys['id_rsa.pub']
+        $_ssh_key_params = $ssh_key_params.filter |$key, $value| { $key != 'line' and $key != 'comment' }
+        @@ssh_authorized_key { "${repository_pg_user}@${facts['networking']['fqdn']}":
           tag     => "pgbackrest::client::${repository_pg_user}::${facts['networking']['fqdn']}",
           target  => "/etc/ssh/puppetkeys/${client_pg_user}",
           user    => 'root',

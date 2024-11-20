@@ -37,8 +37,8 @@ define pgbackrest::repository::stanza(
 
     if !empty($ssh_key_params) {
       # drop "line" key from params, which are not supported by ssh_authorized_keys
-      $_ssh_key_params = $ssh_key_params.filter |$key, $value| { $key != 'line' }
-      ssh_authorized_key { $username:
+      $_ssh_key_params = $ssh_key_params.filter |$key, $value| { $key != 'line' and $key != 'comment' }
+      ssh_authorized_key { "${username}-${ssh_key_params['comment']}":
         target  => "/etc/ssh/puppetkeys/${username}",
         user    => 'root',
         options => [
