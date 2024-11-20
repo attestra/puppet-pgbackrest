@@ -31,20 +31,22 @@ define pgbackrest::repository::stanza(
   user { $username:
     system => true,
   }
-  if !empty($ssh_key_params) {
+  if $pgbackrest::repository::manage_ssh {
     ssh::keygen { $username: }
 
-    # drop "line" key from params, which are not supported by ssh_authorized_keys
-    $_ssh_key_params = $ssh_key_params.filter |$key, $value| { $key != 'line' }
-    ssh_authorized_key { $username:
-      target  => "/etc/ssh/puppetkeys/${username}",
-      user    => 'root',
-      options => [
-        'restrict',
-        'command="/usr/bin/pgbackrest ${SSH_ORIGINAL_COMMAND#* }"',  #lint:ignore:single_quote_string_with_variables
-      ],
-      *       => $_ssh_key_params,
+    if !empty($ssh_key_params) {
+      # drop "line" key from params, which are not supported by ssh_authorized_keys
+      $_ssh_key_params = $ssh_key_params.filter |$key, $value| { $key != 'line' }
+      ssh_authorized_key { $username:
+        target  => "/etc/ssh/puppetkeys/${username}",
+        user    => 'root',
+        options => [
+          'restrict',
+          'command="/usr/bin/pgbackrest ${SSH_ORIGINAL_COMMAND#* }"',  #lint:ignore:single_quote_string_with_variables
+        ],
+        *       => $_ssh_key_params,
+      }
+      # TODO restricted to this $name
     }
-    # TODO realize server's ssh key here, restricted to this $name
   }
 }
