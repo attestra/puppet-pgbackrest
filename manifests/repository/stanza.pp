@@ -29,10 +29,11 @@ define pgbackrest::repository::stanza(
   }
   $username = "pgbackrest-${name}"
   user { $username:
-    system => true,
+    system     => true,
+    managehome => true,
   }
   if $pgbackrest::repository::manage_ssh {
-    ssh::keygen { $username: }
+    ssh_keygen { $username: }
 
     if !empty($ssh_key_params) {
       # drop "line" key from params, which are not supported by ssh_authorized_keys

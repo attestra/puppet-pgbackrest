@@ -13,12 +13,13 @@ class pgbackrest::client(
   include pgbackrest
 
   if $manage_ssh {
-    ssh::keygen { $pg_user: }
     if $facts['ssh_keys_users'] and $facts['ssh_keys_users'][$pg_user] and $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'] {
       @@pgbackrest::repository::stanza { $stanza_name:
         tag            => $server_collect_tag,
         ssh_key_params => $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'],
       }
+    } else {
+      ssh_keygen { $pg_user: }
     }
     # authorize the repository's SSH keys to connect to this server to
     # pull full backups

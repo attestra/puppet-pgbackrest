@@ -83,8 +83,7 @@ The way this works is as follows:
     pull full backups from clients
 
 SSH keys management depends on the built-in `ssh_authorized_key`
-resource and a `ssh::keygen` define that's currently not publicly
-available.
+resource and the [`puppet/ssh_keygen`](https://github.com/voxpupuli/puppet-ssh_keygen) modeule.
 
 ## Limitations
 
