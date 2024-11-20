@@ -68,6 +68,24 @@ Then on the `repository` server:
 
     include pgbackrest::repository
 
+The way this works is as follows:
+
+ 1. Each client exports a `pgbackrest::repository::stanza` resource
+    which manage a user, a SSH key, and a configuration snippet
+
+ 2. The repository server realizes those resources to allow the client
+    to push WAL files
+
+ 3. The repository, in turn, exports the SSH keys associated to those
+    users back to the clients
+
+ 4. The clients realize those resources to allow the repository to
+    pull full backups from clients
+
+SSH keys management depends on the built-in `ssh_authorized_key`
+resource and a `ssh::keygen` define that's currently not publicly
+available.
+
 ## Limitations
 
 Do not enable `manage_package_repo` when using

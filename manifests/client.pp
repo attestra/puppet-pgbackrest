@@ -22,7 +22,7 @@ class pgbackrest::client(
     }
     # authorize the repository's SSH keys to connect to this server to
     # pull full backups
-    Ssh_authorized_key <<| tag == $repository_collect_tag |>>
+    Ssh_authorized_key <<| tag == "pgbackrest::client::pgbackrest-${stanza_name}::${repository_fqdn}" |>>
   }
 
   # XXX: duplicates some of pgbackrest::repository::stanza
@@ -32,7 +32,7 @@ class pgbackrest::client(
         'log-level-file'  => 'detail',
         'repo1-path'      => '/var/lib/pgbackrest',
         'repo1-host'      => $repository_fqdn,
-        'repo1-host-user' => $pg_user,
+        'repo1-host-user' => "pgbackrest-${stanza_name}",
       },
       $stanza_name => {
         'pg1-path' => $pg_cluster_path,
