@@ -4,6 +4,7 @@ class pgbackrest::client(
   String[1] $server_collect_tag = "pgbackrest::server::${repository_fqdn}",
   String[1] $repository_collect_tag = "pgbackrest::repository::${repository_fqdn}",
   Stdlib::Fqdn $stanza_name = $facts['networking']['fqdn'],
+  String[1] $unix_user = "pgbackrest-${$facts['networking']['hostname']}",
   String[1] $pg_user = 'postgres',
   Integer $pg_cluster_version = 15,
   String[1] $pg_cluster_name = 'main',
@@ -15,15 +16,17 @@ class pgbackrest::client(
   if $manage_ssh {
     if $facts['ssh_keys_users'] and $facts['ssh_keys_users'][$pg_user] and $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'] {
       @@pgbackrest::repository::stanza { $stanza_name:
+        username       => $unix_user,
         tag            => $server_collect_tag,
         ssh_key_params => $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'],
       }
     } else {
+      # XXX: assumes pg_user exists
       ssh_keygen { $pg_user: }
     }
     # authorize the repository's SSH keys to connect to this server to
     # pull full backups
-    Ssh_authorized_key <<| tag == "pgbackrest::client::pgbackrest-${stanza_name}::${repository_fqdn}" |>>
+    Ssh_authorized_key <<| tag == "pgbackrest::client::${unix_user}::${repository_fqdn}" |>>
   }
 
   # XXX: duplicates some of pgbackrest::repository::stanza
@@ -33,7 +36,7 @@ class pgbackrest::client(
         'log-level-file'  => 'detail',
         'repo1-path'      => '/var/lib/pgbackrest',
         'repo1-host'      => $repository_fqdn,
-        'repo1-host-user' => "pgbackrest-${stanza_name}",
+        'repo1-host-user' => $unix_user,
       },
       $stanza_name => {
         'pg1-path' => $pg_cluster_path,

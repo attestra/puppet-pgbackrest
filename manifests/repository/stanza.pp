@@ -14,6 +14,7 @@
 # expiration
 define pgbackrest::repository::stanza(
   Integer $pg_cluster_version = 15,
+  String $username = "pgbackrest-${name}",
   String[1] $pg_cluster_name = 'main',
   String[1] $pg_cluster_path = "/var/lib/postgresql/${pg_cluster_version}/${pg_cluster_name}",
   Hash $ssh_key_params = {},
@@ -27,13 +28,15 @@ define pgbackrest::repository::stanza(
       }
     }
   }
-  $username = "pgbackrest-${name}"
   user { $username:
+    ensure     => present,
     system     => true,
     managehome => true,
   }
   if $pgbackrest::repository::manage_ssh {
-    ssh_keygen { $username: }
+    ssh_keygen { $username:
+      require => User[$username],
+    }
 
     if !empty($ssh_key_params) {
       # drop "line" key from params, which are not supported by ssh_authorized_keys
