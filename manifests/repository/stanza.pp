@@ -9,9 +9,11 @@
 # deliberately.
 #
 # TODO:
-# isolation: server A shouldn't have access to server B's backups, watch out for lateral
-# systemd timer per "stanza" (client) https://pgbackrest.org/user-guide.html#quickstart/schedule-backup
-# expiration
+# - global config not purged?
+# - isolation: server A shouldn't have access to server B's backups, watch out for lateral
+# - systemd timer per "stanza" (client) https://pgbackrest.org/user-guide.html#quickstart/schedule-backup
+# - expiration
+# - parameter docs
 define pgbackrest::repository::stanza(
   Integer $pg_cluster_version = 15,
   String $username = "pgbackrest-${name}",
@@ -33,6 +35,14 @@ define pgbackrest::repository::stanza(
     system     => true,
     managehome => true,
   }
+  # TODO: missing:
+  # chmod +r /etc/ssh/puppetkeys/pgbackrest-weather-01 and .../postgres
+  # mkdir /var/lib/pgbackrest/backup/weather-01.torproject.org /var/lib/pgbackrest/archive/weather-01.torproject.org/
+  # chown $username ...
+  # adduser $username postgres
+  # sudo -u pgbackrest-weather-01 pgbackrest --lock-path=/tmp --stanza=weather-01.torproject.org stanza-create
+  # per host lock file (--lock-path) and log files (--log-path)
+  # archive_comand? -> docs?
   if $pgbackrest::repository::manage_ssh {
     ssh_keygen { $username:
       require => User[$username],

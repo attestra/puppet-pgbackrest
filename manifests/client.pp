@@ -1,4 +1,6 @@
 # a PostgreSQL server that's backed up to a remote pgbackrest "repository"
+#
+# the stanza_name is also used as a hostname by the repository to connect back to the client
 class pgbackrest::client(
   Stdlib::Fqdn $repository_fqdn,
   String[1] $server_collect_tag = "pgbackrest::server::${repository_fqdn}",
