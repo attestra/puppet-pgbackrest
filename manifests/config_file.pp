@@ -1,9 +1,11 @@
 # @summary Write a pgbackrest configuration file snippet
 define pgbackrest::config_file(
   Hash[String,Hash] $config,
-  String $filename   = "/etc/pgbackrest/conf.d/${name}.conf",
+  String $filename   = "${pgbackrest::config::directory}/${name}.conf",
   Boolean $show_diff = true,
 ) {
+  # TODO: mkdir_p on the dirname($filename)
+
   # Add each section block configs
   $config.each |String $section, Hash $settings| {
     $settings.each |String $name, String $value| {
