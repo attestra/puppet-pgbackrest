@@ -29,6 +29,7 @@ class pgbackrest::client(
     # authorize the repository's SSH keys to connect to this server to
     # pull full backups
     Ssh_authorized_key <<| tag == "pgbackrest::client::${unix_user}::${repository_fqdn}" |>>
+    ensure_resource('file', "/etc/ssh/puppetkeys/${pg_user}", { owner => 'root', mode  => '0444', })
   }
 
   # XXX: duplicates some of pgbackrest::repository::stanza

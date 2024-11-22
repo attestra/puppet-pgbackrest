@@ -60,6 +60,8 @@ define pgbackrest::repository::stanza(
         ],
         *       => $_ssh_key_params,
       }
+      ensure_resource('file', "/etc/ssh/puppetkeys/${username}", { owner => 'root', mode  => '0444', })
+
       # TODO restricted to this $name
     }
   }
