@@ -8,9 +8,12 @@
 # accessing other servers will be mitigated by duplicate resources,
 # deliberately.
 #
+# Assuming the resource is trusted, a user sandbox is created for each
+# stanza, which keeps server A from accessing server B's backups
+# entirely.
+#
 # TODO:
 # - global config not purged?
-# - isolation: server A shouldn't have access to server B's backups, watch out for lateral
 # - systemd timer per "stanza" (client) https://pgbackrest.org/user-guide.html#quickstart/schedule-backup
 # - expiration
 # - parameter docs
@@ -21,6 +24,7 @@ define pgbackrest::repository::stanza(
   String[1] $pg_cluster_path = "/var/lib/postgresql/${pg_cluster_version}/${pg_cluster_name}",
   Hash $ssh_key_params = {},
 ) {
+  # create the config file for the stanza
   pgbackrest::config_file { "${name}-${pg_cluster_name}-${pg_cluster_version}":
     config => {
       # XXX: "${name}-${pg_cluster_name}-${pg_cluster_version}" => {
@@ -30,17 +34,33 @@ define pgbackrest::repository::stanza(
       }
     }
   }
+  # create the actual "stanza"
+  #
+  # ...which are directories in /var/lib/pgbackrest, essentially
+  #
+  # this runs as root because the sandbox user doesn't have access...
+  -> exec { "create-stanza-${name}":
+    command     => "pgbackrest --stanza=${name} stanza-create",
+    refreshonly => true,
+  }
+  # ... but this will fix permissions
+  -> file { [
+    "/var/lib/pgbackrest/backup/${name}",
+    "/var/lib/pgbackrest/archive/${name}",
+  ]:
+    ensure  => 'directory',
+    mode    => '0750',
+    owner   => $username,
+    group   => $username,
+    require => User[$username],
+  }
+  # create a username for the sandbox
   user { $username:
     ensure     => present,
     system     => true,
     managehome => true,
   }
   # TODO: missing:
-  # chmod +r /etc/ssh/puppetkeys/pgbackrest-weather-01 and .../postgres
-  # mkdir /var/lib/pgbackrest/backup/weather-01.torproject.org /var/lib/pgbackrest/archive/weather-01.torproject.org/
-  # chown $username ...
-  # adduser $username postgres
-  # sudo -u pgbackrest-weather-01 pgbackrest --lock-path=/tmp --stanza=weather-01.torproject.org stanza-create
   # per host lock file (--lock-path) and log files (--log-path)
   # archive_comand? -> docs?
   if $pgbackrest::repository::manage_ssh {
@@ -61,8 +81,6 @@ define pgbackrest::repository::stanza(
         *       => $_ssh_key_params,
       }
       ensure_resource('file', "/etc/ssh/puppetkeys/${username}", { owner => 'root', mode  => '0444', })
-
-      # TODO restricted to this $name
     }
   }
 }
