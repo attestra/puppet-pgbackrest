@@ -6,16 +6,16 @@
 #   include pgbackrest::config
 #
 class pgbackrest::config(
-  String $filename   = '/etc/pgbackrest.conf',
-  String $directory  = '/etc/pgbackrest/conf.d',
-  Boolean $show_diff = true,
+  String $filename          = '/etc/pgbackrest.conf',
+  String $directory         = '/etc/pgbackrest/conf.d',
+  Boolean $manage_directory = true,
+  Boolean $show_diff        = true,
 ) {
-  # XXX: hardcoded, switch to extlib::mkdir_p after Puppet 7 upgrade
-  file { '/etc/pgbackrest':
-    ensure => directory,
-  }
+  # ensure directory is purged if managed
   file { $directory:
-    ensure => directory,
+    ensure  => 'directory',
+    purge   => $manage_directory,
+    recurse => $manage_directory,
   }
   pgbackrest::config_file { $filename:
     filename  => $filename,

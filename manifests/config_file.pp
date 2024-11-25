@@ -4,8 +4,12 @@ define pgbackrest::config_file(
   String $filename   = "${pgbackrest::config::directory}/${name}.conf",
   Boolean $show_diff = true,
 ) {
-  # TODO: mkdir_p on the dirname($filename)
+  # ensure parent directories exist
+  ensure_resource('file', extlib::dir_split(dirname($filename)), {'ensure' => 'directory'})
 
+  file { $filename:
+    ensure => present,
+  }
   # Add each section block configs
   $config.each |String $section, Hash $settings| {
     $settings.each |String $name, String $value| {
