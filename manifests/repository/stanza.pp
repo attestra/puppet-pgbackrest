@@ -29,8 +29,10 @@ define pgbackrest::repository::stanza(
     config => {
       # XXX: "${name}-${pg_cluster_name}-${pg_cluster_version}" => {
       $name => {
-        'pg1-host' => $name,
-        'pg1-path' => $pg_cluster_path,
+        'pg1-host'  => $name,
+        'pg1-path'  => $pg_cluster_path,
+        'lock-path' => "/var/lock/pgbackrest/${name}",
+        'log-path'  => "/var/log/pgbackrest/${name}",
       }
     }
   }
@@ -47,6 +49,8 @@ define pgbackrest::repository::stanza(
   -> file { [
     "/var/lib/pgbackrest/backup/${name}",
     "/var/lib/pgbackrest/archive/${name}",
+    "/var/log/pgbackrest/${name}",
+    "/var/lock/pgbackrest/${name}",
   ]:
     ensure  => 'directory',
     mode    => '0750',
@@ -61,7 +65,6 @@ define pgbackrest::repository::stanza(
     managehome => true,
   }
   # TODO: missing:
-  # per host lock file (--lock-path) and log files (--log-path)
   # archive_comand? -> docs?
   if $pgbackrest::repository::manage_ssh {
     ssh_keygen { $username:

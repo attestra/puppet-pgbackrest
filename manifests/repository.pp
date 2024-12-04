@@ -6,9 +6,27 @@ class pgbackrest::repository (
   String[1] $server_collect_tag = "pgbackrest::server::${facts['networking']['fqdn']}",
   String[1] $repository_collect_tag = "pgbackrest::repository::${facts['networking']['fqdn']}",
   Boolean $manage_ssh = true,
+  String[1] $base_directory = '/var/lib/pgbackrest',
 ) {
   include pgbackrest
 
+  file { [
+    $base_directory,
+    "${base_directory}/archive",
+    '/var/lock/pgbackrest',
+  ]:
+    ensure => directory,
+    # make directory only "executable", to restrict enumeration of
+    # other hosts and lateral movement
+    mode   => '0751',
+    # we explicitly don't purge here, to allow for polite retirements
+  }
+  # backup directory needs to be enumerable, unfortunately, otherwise
+  # the `info` command fails.
+  file { "${base_directory}/backup":
+    ensure => directory,
+    mode   => '0755',
+  }
   # collect the server's configurations and SSH keys
   Pgbackrest::Repository::Stanza <<| tag == $server_collect_tag |>>
 
