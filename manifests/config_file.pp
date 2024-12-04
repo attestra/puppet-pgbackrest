@@ -12,7 +12,7 @@ define pgbackrest::config_file(
   }
   # Add each section block configs
   $config.each |String $section, Hash $settings| {
-    $settings.each |String $name, String $value| {
+    $settings.each |String $name, Optional[String] $value| {
       # Remove values not defined or empty
       $is_present = $value ? {
         undef   => 'absent',
@@ -21,7 +21,7 @@ define pgbackrest::config_file(
       }
 
       # Write the configuration options to pgbackrest::config::filename
-      ini_setting { "${section} ${name}":
+      ini_setting { "${filename} ${section} ${name}":
         ensure    => $is_present,
         path      => $filename,
         section   => $section,
