@@ -30,6 +30,40 @@ class pgbackrest::repository (
   # collect the server's configurations and SSH keys
   Pgbackrest::Repository::Stanza <<| tag == $server_collect_tag |>>
 
+  [ 'full', 'diff'].each | $kind | {
+    systemd::timer { "pgbackrest-backup-${kind}@.timer":
+      enable          => false,
+      active          => false,
+      timer_content   => inline_epp( @("EOF") ),
+        [Unit]
+        Description=trigger ${kind} backups on %i
+
+        [Timer]
+        <%- if ${kind} == "full" { -%>
+        OnCalendar=weekly
+        RandomizedDelaySec=7d
+        <%- } elsif ${kind} == "diff" { -%>
+        OnCalendar=daily
+        RandomizedDelaySec=24h
+        <%- } -%>
+        FixedRandomDelay=true
+        [Install]
+        WantedBy=timers.target
+        | EOF
+      service_content => @("EOF"),
+        [Unit]
+        Description=pgBackRest ${kind} backups for %i
+        After=network.target
+
+        [Service]
+        Type=oneshot
+        User=pgbackrest-%i
+        Group=pgbackrest-%i
+        ExecStart=pgbackrest --stanza=%i.torproject.org backup --log-level-file=off --log-level-console=info --type=${kind}
+        | EOF
+    }
+  }
+
   if $manage_ssh {
     # export all SSH keys of pgbackrest-* users so that clients can
     # realize them and authorize those users back in

@@ -14,7 +14,6 @@
 #
 # TODO:
 # - global config not purged?
-# - systemd timer per "stanza" (client) https://pgbackrest.org/user-guide.html#quickstart/schedule-backup
 # - expiration
 # - parameter docs
 define pgbackrest::repository::stanza(
@@ -63,6 +62,20 @@ define pgbackrest::repository::stanza(
     ensure     => present,
     system     => true,
     managehome => true,
+  }
+  # find back the username, we assume we're provided with a username that respect the prefix
+  $shortname = regsubst($username, '^pgbackrest-', '')
+  [ 'full', 'diff'].each | $kind | {
+    systemd::unit_file { "pgbackrest-backup-${kind}@${shortname}.service":
+      enable => false,
+      active => false,
+      target => "/etc/systemd/system/pgbackrest-backup-${kind}@.service",
+    }
+    systemd::unit_file { "pgbackrest-backup-${kind}@${shortname}.timer":
+      enable => true,
+      active => true,
+      target => "/etc/systemd/system/pgbackrest-backup-${kind}@.timer",
+    }
   }
   # TODO: missing:
   # archive_comand? -> docs?
