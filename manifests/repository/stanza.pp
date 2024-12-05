@@ -14,7 +14,6 @@
 #
 # TODO:
 # - global config not purged?
-# - expiration
 # - parameter docs
 # - make SSH configuration more generic, we hardcode our paths here
 define pgbackrest::repository::stanza(
