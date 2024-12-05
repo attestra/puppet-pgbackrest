@@ -28,10 +28,11 @@ define pgbackrest::repository::stanza(
     config => {
       # XXX: "${name}-${pg_cluster_name}-${pg_cluster_version}" => {
       $name => {
-        'pg1-host'  => $name,
-        'pg1-path'  => $pg_cluster_path,
-        'lock-path' => "/var/lock/pgbackrest/${name}",
-        'log-path'  => "/var/log/pgbackrest/${name}",
+        'pg1-host'   => $name,
+        'pg1-path'   => $pg_cluster_path,
+        'repo1-path' => $pgbackrest::repository::base_directory,
+        'lock-path'  => "/var/lock/pgbackrest/${name}",
+        'log-path'   => "/var/log/pgbackrest/${name}",
       }
     }
   }
@@ -43,12 +44,12 @@ define pgbackrest::repository::stanza(
   ~> exec { "create-stanza-${name}":
     user    => $username,
     command => "pgbackrest --stanza=${name} stanza-create",
-    creates => "/var/lib/pgbackrest/archive/${name}/archive.info",
+    creates => "${pgbackrest::repository::base_directory}/archive/${name}/archive.info",
   }
   # ... but this will fix permissions
   file { [
-    "/var/lib/pgbackrest/backup/${name}",
-    "/var/lib/pgbackrest/archive/${name}",
+    "${pgbackrest::repository::base_directory}/backup/${name}",
+    "${pgbackrest::repository::base_directory}/archive/${name}",
     "/var/log/pgbackrest/${name}",
     "/var/lock/pgbackrest/${name}",
   ]:
