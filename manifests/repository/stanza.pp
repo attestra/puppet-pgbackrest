@@ -37,15 +37,16 @@ define pgbackrest::repository::stanza(
   }
   # create the actual "stanza"
   #
-  # ...which are directories in /var/lib/pgbackrest, essentially
-  #
-  # this runs as root because the sandbox user doesn't have access...
-  -> exec { "create-stanza-${name}":
-    command     => "pgbackrest --stanza=${name} stanza-create",
-    refreshonly => true,
+  # ...which are directories in /var/lib/pgbackrest, essentially, but
+  # also some settings inside
+  # /var/lib/pgbackrest/{archive,backup}/$name/
+  ~> exec { "create-stanza-${name}":
+    user    => $username,
+    command => "pgbackrest --stanza=${name} stanza-create",
+    creates => "/var/lib/pgbackrest/archive/${name}/archive.info",
   }
   # ... but this will fix permissions
-  -> file { [
+  file { [
     "/var/lib/pgbackrest/backup/${name}",
     "/var/lib/pgbackrest/archive/${name}",
     "/var/log/pgbackrest/${name}",
@@ -56,6 +57,7 @@ define pgbackrest::repository::stanza(
     owner   => $username,
     group   => $username,
     require => User[$username],
+    before  => Exec["create-stanza-${name}"],
   }
   # create a username for the sandbox
   user { $username:
@@ -66,10 +68,12 @@ define pgbackrest::repository::stanza(
   # find back the username, we assume we're provided with a username that respect the prefix
   $shortname = regsubst($username, '^pgbackrest-', '')
   [ 'full', 'diff'].each | $kind | {
-    systemd::unit_file { "pgbackrest-backup-${kind}@${shortname}.service":
-      enable => false,
-      active => false,
-      target => "/etc/systemd/system/pgbackrest-backup-${kind}@.service",
+    # this is not a systemd::unit_file because that seems buggy and
+    # never converges
+    file { "/etc/systemd/system/pgbackrest-backup-${kind}@${shortname}.service":
+      ensure => 'link',
+      target => "pgbackrest-backup-${kind}@.service",
+      notify => Class['systemd::systemctl::daemon_reload'],
     }
     systemd::unit_file { "pgbackrest-backup-${kind}@${shortname}.timer":
       enable => true,
