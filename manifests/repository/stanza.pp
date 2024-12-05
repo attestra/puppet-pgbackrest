@@ -16,6 +16,7 @@
 # - global config not purged?
 # - expiration
 # - parameter docs
+# - make SSH configuration more generic, we hardcode our paths here
 define pgbackrest::repository::stanza(
   Integer $pg_cluster_version = 15,
   String $username = "pgbackrest-${name}",
@@ -81,8 +82,6 @@ define pgbackrest::repository::stanza(
       target => "/etc/systemd/system/pgbackrest-backup-${kind}@.timer",
     }
   }
-  # TODO: missing:
-  # archive_comand? -> docs?
   if $pgbackrest::repository::manage_ssh {
     ssh_keygen { $username:
       require => User[$username],

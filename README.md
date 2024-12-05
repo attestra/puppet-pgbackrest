@@ -83,7 +83,31 @@ The way this works is as follows:
     pull full backups from clients
 
 SSH keys management depends on the built-in `ssh_authorized_key`
-resource and the [`puppet/ssh_keygen`](https://github.com/voxpupuli/puppet-ssh_keygen) modeule.
+resource and the
+[`puppet/ssh_keygen`](https://github.com/voxpupuli/puppet-ssh_keygen)
+module.
+
+The WAL archival requires changes on the PostgreSQL server (pgbackrest
+client) side. If you are using the `postgresql::server` class from
+[`puppetlabs/postgresql`](https://forge.puppet.com/modules/puppetlabs/postgresql), you would do something like this:
+
+```puppet
+class { 'postgresql::server':
+  config_entries => {
+    wal_level => 'replica',
+    archive_command => "pgbackrest
+    --stanza=${facts['networking']['fqdn']} archive-push %p",
+  }
+}
+```
+
+Or in Hiera:
+
+```yaml
+postgresql::server::config_entries:
+  wal_level: 'replica'
+  archive_command: 'pgbackrest --stanza=materculae.torproject.org archive-push %p'
+```
 
 ## Limitations
 
