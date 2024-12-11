@@ -44,6 +44,10 @@ define pgbackrest::repository::stanza(
   ~> exec { "create-stanza-${name}":
     user    => $username,
     command => "pgbackrest --stanza=${name} stanza-create",
+    # exit code 56 is "DbConnectError" which means stanza-create
+    # failed to connect to the SSH server, let's ignore this and retry
+    # next time
+    returns => [0, 56],
     creates => "${pgbackrest::repository::base_directory}/archive/${name}/archive.info",
   }
   # ... but this will fix permissions
