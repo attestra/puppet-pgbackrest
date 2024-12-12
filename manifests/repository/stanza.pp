@@ -22,6 +22,7 @@ define pgbackrest::repository::stanza(
   String[1] $pg_cluster_name = 'main',
   String[1] $pg_cluster_path = "/var/lib/postgresql/${pg_cluster_version}/${pg_cluster_name}",
   Hash $ssh_key_params = {},
+  Array[PgBackRest::Kind] $kinds = $pgbackrest::repository::schedules.keys(),
 ) {
   # create the config file for the stanza
   pgbackrest::config_file { "${name}-${pg_cluster_name}-${pg_cluster_version}":
@@ -72,7 +73,7 @@ define pgbackrest::repository::stanza(
   }
   # find back the username, we assume we're provided with a username that respect the prefix
   $shortname = regsubst($username, '^pgbackrest-', '')
-  [ 'full', 'diff'].each | $kind | {
+  $kinds.each | $kind | {
     # this is not a systemd::unit_file because that seems buggy and
     # never converges
     file { "/etc/systemd/system/pgbackrest-backup-${kind}@${shortname}.service":

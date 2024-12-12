@@ -1,5 +1,6 @@
 # configure a central repository to collect stanzas from other repositories
 class pgbackrest::repository (
+  PgBackRest::Schedule $schedules,
   String[1] $server_collect_tag = "pgbackrest::server::${facts['networking']['fqdn']}",
   String[1] $repository_collect_tag = "pgbackrest::repository::${facts['networking']['fqdn']}",
   Boolean $manage_ssh = true,
@@ -27,23 +28,20 @@ class pgbackrest::repository (
   # collect the server's configurations and SSH keys
   Pgbackrest::Repository::Stanza <<| tag == $server_collect_tag |>>
 
-  [ 'full', 'diff'].each | $kind | {
+  $schedules.each | $kind, $configuration | {
     systemd::timer { "pgbackrest-backup-${kind}@.timer":
       enable          => false,
       active          => false,
-      timer_content   => inline_epp( @("EOF") ),
+      timer_content   => inline_epp( @(EOF) ),
         [Unit]
-        Description=trigger ${kind} backups on %i
+        Description=trigger <%= $kind %> backups on %i
 
         [Timer]
-        <%- if ${kind} == "full" { -%>
-        OnCalendar=weekly
-        RandomizedDelaySec=7d
-        <%- } elsif ${kind} == "diff" { -%>
-        OnCalendar=daily
-        RandomizedDelaySec=24h
+        <%- $configuration.each | $key, $value | { -%>
+        <%= $key -%>=<%= $value %>
         <%- } -%>
         FixedRandomDelay=true
+
         [Install]
         WantedBy=timers.target
         | EOF
