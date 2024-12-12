@@ -1,12 +1,18 @@
 # @summary Write a pgbackrest configuration file snippet
 define pgbackrest::config_file(
   Hash[String,Hash] $config,
-  String $filename   = "/etc/pgbackrest/conf.d/${name}.conf",
+  String $filename   = "${pgbackrest::config::directory}/${name}.conf",
   Boolean $show_diff = true,
 ) {
+  # ensure parent directories exist
+  ensure_resource('file', extlib::dir_split(dirname($filename)), {'ensure' => 'directory'})
+
+  file { $filename:
+    ensure => present,
+  }
   # Add each section block configs
   $config.each |String $section, Hash $settings| {
-    $settings.each |String $name, String $value| {
+    $settings.each |String $name, Optional[String] $value| {
       # Remove values not defined or empty
       $is_present = $value ? {
         undef   => 'absent',
@@ -15,7 +21,7 @@ define pgbackrest::config_file(
       }
 
       # Write the configuration options to pgbackrest::config::filename
-      ini_setting { "${section} ${name}":
+      ini_setting { "${filename} ${section} ${name}":
         ensure    => $is_present,
         path      => $filename,
         section   => $section,
