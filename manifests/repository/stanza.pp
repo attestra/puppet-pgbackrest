@@ -74,13 +74,16 @@ define pgbackrest::repository::stanza(
   # find back the username, we assume we're provided with a username that respect the prefix
   $shortname = regsubst($username, '^pgbackrest-', '')
   $kinds.each | $kind | {
-    service { "pgbackrest-backup-${kind}@${shortname}.service":
-      ensure => false,
-      enable => false,
-    }
-    service { "pgbackrest-backup-${kind}@${shortname}.timer":
-      ensure => true,
-      enable => true,
+    # make sure the schedule is properly defined
+    if $pgbackrest::repository::schedules[$kind] != undef and !empty($pgbackrest::repository::schedules[$kind]) {
+      service { "pgbackrest-backup-${kind}@${shortname}.service":
+        ensure => false,
+        enable => false,
+      }
+      service { "pgbackrest-backup-${kind}@${shortname}.timer":
+        ensure => true,
+        enable => true,
+      }
     }
   }
   if $pgbackrest::repository::manage_ssh {
