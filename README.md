@@ -109,6 +109,43 @@ postgresql::server::config_entries:
   archive_command: 'pgbackrest --stanza=materculae.torproject.org archive-push %p'
 ```
 
+Schedules are defined in Hiera, but be aware of [systemd issue
+21166](https://github.com/systemd/systemd/issues/21166), which you will trip on if you rely on the default
+configuration. By default, reboots of the repository server will
+offset the run time of jobs significantly, sometimes delaying backups
+to up to the randomization period (the `RandomizedDelaySec`, for
+example, up to a month for a full backups).
+
+A workaround is to define the schedule in each client, like this:
+
+```puppet
+$day_of_month = fqdn_rand(28) + 1 # 1-28
+$day_of_week = [
+  'Mon',
+  'Tue',
+  'Wed',
+  'Thu',
+  'Fri',
+  'Sat',
+  'Sun',
+][fqdn_rand(7)] # 0-6 means, Mon-Sun
+
+# monthly full backups, weekly diffs, no incrementals
+class { 'pgbackrest::client':
+  schedules       => {
+    'full' => {
+      'OnCalendar'         => "*-*-${day_of_month} 00:00:00",
+      'RandomizedDelaySec' => '1d',
+    },
+    'diff' => {
+      'OnCalendar'         => "${day_of_week} *-*-* 00:00:00",
+      'RandomizedDelaySec' => '1d',
+    },
+    'incr' => {},
+  }
+}
+```
+
 ## Limitations
 
 Do not enable `manage_package_repo` when using

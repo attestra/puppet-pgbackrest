@@ -17,12 +17,12 @@
 # - parameter docs
 # - make SSH configuration more generic, we hardcode our paths here
 define pgbackrest::repository::stanza(
+  PgBackRest::Schedule $schedules,
   Integer $pg_cluster_version = 15,
   String $username = "pgbackrest-${name}",
   String[1] $pg_cluster_name = 'main',
   String[1] $pg_cluster_path = "/var/lib/postgresql/${pg_cluster_version}/${pg_cluster_name}",
   Hash $ssh_key_params = {},
-  Array[PgBackRest::Kind] $kinds = $pgbackrest::repository::schedules.keys(),
 ) {
   # create the config file for the stanza
   pgbackrest::config_file { "${name}-${pg_cluster_name}-${pg_cluster_version}":
@@ -73,19 +73,40 @@ define pgbackrest::repository::stanza(
   }
   # find back the username, we assume we're provided with a username that respect the prefix
   $shortname = regsubst($username, '^pgbackrest-', '')
-  $kinds.each | $kind | {
-    # make sure the schedule is properly defined
-    if $pgbackrest::repository::schedules[$kind] != undef and !empty($pgbackrest::repository::schedules[$kind]) {
-      service { "pgbackrest-backup-${kind}@${shortname}.service":
-        ensure => false,
-        enable => false,
-      }
-      service { "pgbackrest-backup-${kind}@${shortname}.timer":
-        ensure => true,
-        enable => true,
+  $schedules.each | $kind, $configuration | {
+    if $configuration != undef and !empty($configuration) {
+      systemd::timer { "pgbackrest-backup-${kind}@${shortname}.timer":
+        enable          => true,
+        active          => true,
+        timer_content   => inline_epp( @(EOF) ),
+          [Unit]
+          Description=trigger <%= $kind %> backups on <%= $shortname %>
+
+          [Timer]
+          <%- $configuration.each | $key, $value | { -%>
+          <%= $key -%>=<%= $value %>
+          <%- } -%>
+          FixedRandomDelay=true
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+          | EOF
+        service_content => @("EOF"),
+          [Unit]
+          Description=pgBackRest ${kind} backups for $shortname
+          After=network.target
+
+          [Service]
+          Type=oneshot
+          User=$username
+          Group=$username
+          ExecStart=pgbackrest --stanza=$shortname.torproject.org backup --log-level-file=off --log-level-console=info --type=${kind}
+          | EOF
       }
     }
   }
+
   if $pgbackrest::repository::manage_ssh {
     ssh_keygen { $username:
       require => User[$username],

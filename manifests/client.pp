@@ -12,12 +12,14 @@ class pgbackrest::client(
   String[1] $pg_cluster_name = 'main',
   String[1] $pg_cluster_path = "/var/lib/postgresql/${pg_cluster_version}/${pg_cluster_name}",
   Boolean $manage_ssh = true,
+  PgBackRest::Schedule $schedules,
 ) {
   include pgbackrest
 
   if $manage_ssh {
     if $facts['ssh_keys_users'] and $facts['ssh_keys_users'][$pg_user] and $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'] {
       @@pgbackrest::repository::stanza { $stanza_name:
+        schedules      => $schedules,
         username       => $unix_user,
         tag            => $server_collect_tag,
         ssh_key_params => $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'],

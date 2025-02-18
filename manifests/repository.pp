@@ -1,6 +1,5 @@
 # configure a central repository to collect stanzas from other repositories
 class pgbackrest::repository (
-  PgBackRest::Schedule $schedules,
   String[1] $server_collect_tag = "pgbackrest::server::${facts['networking']['fqdn']}",
   String[1] $repository_collect_tag = "pgbackrest::repository::${facts['networking']['fqdn']}",
   Boolean $manage_ssh = true,
@@ -28,38 +27,6 @@ class pgbackrest::repository (
   }
   # collect the server's configurations and SSH keys
   Pgbackrest::Repository::Stanza <<| tag == $server_collect_tag |>>
-
-  $schedules.each | $kind, $configuration | {
-    systemd::timer { "pgbackrest-backup-${kind}@.timer":
-      enable          => false,
-      active          => false,
-      timer_content   => inline_epp( @(EOF) ),
-        [Unit]
-        Description=trigger <%= $kind %> backups on %i
-
-        [Timer]
-        <%- $configuration.each | $key, $value | { -%>
-        <%= $key -%>=<%= $value %>
-        <%- } -%>
-        FixedRandomDelay=true
-        Persistent=true
-
-        [Install]
-        WantedBy=timers.target
-        | EOF
-      service_content => @("EOF"),
-        [Unit]
-        Description=pgBackRest ${kind} backups for %i
-        After=network.target
-
-        [Service]
-        Type=oneshot
-        User=pgbackrest-%i
-        Group=pgbackrest-%i
-        ExecStart=pgbackrest --stanza=%i.torproject.org backup --log-level-file=off --log-level-console=info --type=${kind}
-        | EOF
-    }
-  }
 
   if $manage_ssh {
     # export all SSH keys of pgbackrest-* users so that clients can

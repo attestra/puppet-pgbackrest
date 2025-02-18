@@ -10,7 +10,7 @@ pgbackrest::config:
   global: {}
   main: {}
 
-pgbackrest::repository::schedules:
+pgbackrest::client::schedules:
   full:
     OnCalendar: "monthly"
     RandomizedDelaySec: "30d"
