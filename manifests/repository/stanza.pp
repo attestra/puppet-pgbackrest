@@ -65,6 +65,13 @@ define pgbackrest::repository::stanza(
     require => User[$username],
     before  => Exec["create-stanza-${name}"],
   }
+  # and this will ensure the lockfile directory restores on boot
+  file { "/etc/tmpfiles.d/pgbackrest-${username}.conf":
+    content => @("EOF"),
+    #Type Path                                     Mode User Group Age         Argument
+    d     /var/lock/pgbackrest/${name}             0750 ${username} ${username}
+    |EOF
+  }
   # create a username for the sandbox
   user { $username:
     ensure     => present,
