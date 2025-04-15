@@ -103,12 +103,18 @@ define pgbackrest::repository::stanza(
           [Unit]
           Description=pgBackRest ${kind} backups for $shortname
           After=network.target
+          StartLimitIntervalSec=1d
+          StartLimitBurst=10
 
           [Service]
           Type=oneshot
           User=$username
           Group=$username
           ExecStart=pgbackrest --stanza=$shortname.torproject.org backup --log-level-file=off --log-level-console=info --type=${kind}
+          Restart=on-failure
+          RestartSec=1m
+          RestartSteps=10
+          RestartMaxDelaySec=1h
           | EOF
       }
     }
