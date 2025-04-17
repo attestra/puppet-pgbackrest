@@ -19,10 +19,11 @@ class pgbackrest::client(
   if $manage_ssh {
     if $facts['ssh_keys_users'] and $facts['ssh_keys_users'][$pg_user] and $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'] {
       @@pgbackrest::repository::stanza { $stanza_name:
-        schedules      => $schedules,
-        username       => $unix_user,
-        tag            => $server_collect_tag,
-        ssh_key_params => $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'],
+        schedules          => $schedules,
+        username           => $unix_user,
+        tag                => $server_collect_tag,
+        pg_cluster_version => $pg_cluster_version,
+        ssh_key_params     => $facts['ssh_keys_users'][$pg_user]['id_rsa.pub'],
       }
     } else {
       # XXX: assumes pg_user exists
