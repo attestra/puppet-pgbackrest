@@ -11,6 +11,8 @@ class pgbackrest::config(
   Boolean $manage_directory = true,
   Boolean $show_diff        = true,
 ) {
+  # create parent dirs
+  ensure_resource('file', extlib::dir_split(dirname($directory)), {'ensure' => 'directory'})
   # ensure directory is purged if managed
   file { $directory:
     ensure  => 'directory',
