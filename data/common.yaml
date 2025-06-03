@@ -1,5 +1,6 @@
 ---
-# Don't enable this if using puppetlabs/postgresql with $manage_package_repo enabled
+# Don't enable this if using puppetlabs/postgresql with
+# $manage_package_repo enabled
 pgbackrest::manage_package_repo: false
 # You can assign a specific version
 pgbackrest::version: 'present'
@@ -8,3 +9,14 @@ pgbackrest::version: 'present'
 pgbackrest::config:
   global: {}
   main: {}
+
+pgbackrest::client::schedules:
+  full:
+    OnCalendar: "monthly"
+    RandomizedDelaySec: "30d"
+  diff:
+    OnCalendar: "weekly"
+    RandomizedDelaySec: "7d"
+  incr:
+    OnCalendar: "daily"
+    RandomizedDelaySec: "24h"
