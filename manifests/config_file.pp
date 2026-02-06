@@ -1,5 +1,5 @@
 # @summary Write a pgbackrest configuration file snippet
-define pgbackrest::config_file(
+define pgbackrest::config_file (
   Hash[String,Hash] $config,
   String $filename   = "/etc/pgbackrest/conf.d/${name}.conf",
   Boolean $show_diff = true,

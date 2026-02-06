@@ -4,7 +4,7 @@
 #
 # @example
 #   include pgbackrest::yumrepos
-class pgbackrest::yumrepos(
+class pgbackrest::yumrepos (
   # optional settings
   Enum['latest','installed','absent'] $release_rpm_ensure,
   Optional[Integer] $enable_version = undef,
