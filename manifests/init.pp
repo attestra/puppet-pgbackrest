@@ -5,7 +5,7 @@
 # @example
 #   include pgbackrest
 #
-class pgbackrest(
+class pgbackrest (
   Boolean $manage_package_repo,
   String $version,
   Hash[String,Hash] $config,

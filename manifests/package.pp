@@ -5,7 +5,7 @@
 # @example
 #   include pgbackrest::package
 #
-class pgbackrest::package() {
+class pgbackrest::package () {
   package { 'pgbackrest':
     ensure => $pgbackrest::version,
   }

@@ -5,7 +5,7 @@
 # @example
 #   include pgbackrest::config
 #
-class pgbackrest::config(
+class pgbackrest::config (
   String $filename   = '/etc/pgbackrest.conf',
   Boolean $show_diff = true,
 ) {
